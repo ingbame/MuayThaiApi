@@ -11,15 +11,15 @@ namespace MuayThaiApi.Data.Models
         }
 
         public long PagoId { get; set; }
-        public int AfiliadoId { get; set; }
+        public int PersonaId { get; set; }
         public DateTime FechaPago { get; set; }
         public bool Mensualidad { get; set; }
         public int? DiasPagados { get; set; }
         public long MetodoId { get; set; }
         public string EvidenciaUrl { get; set; }
 
-        public virtual Afiliado Afiliado { get; set; }
         public virtual MetodosPago Metodo { get; set; }
+        public virtual Persona Persona { get; set; }
         public virtual ICollection<ClasesTomada> ClasesTomada { get; set; }
     }
 }

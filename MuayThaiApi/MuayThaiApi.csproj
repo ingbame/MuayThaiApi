@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MuayThaiApi.Core\MuayThaiApi.Core.csproj" />
+    <ProjectReference Include="..\MuayThaiApi.Entity\MuayThaiApi.Entity.csproj" />
   </ItemGroup>
 
 </Project>

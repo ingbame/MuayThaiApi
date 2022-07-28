@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MuayThaiApi.Data\MuayThaiApi.Data.csproj" />
+    <ProjectReference Include="..\MuayThaiApi.Entity\MuayThaiApi.Entity.csproj" />
   </ItemGroup>
 
 </Project>

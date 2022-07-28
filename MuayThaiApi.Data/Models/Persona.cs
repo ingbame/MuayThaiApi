@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace MuayThaiApi.Data.Models
 {
-    public partial class Afiliado
+    public partial class Persona
     {
-        public Afiliado()
+        public Persona()
         {
             Pagos = new HashSet<Pago>();
         }

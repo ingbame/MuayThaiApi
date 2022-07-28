@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Configuration;
+using MuayThaiApi.Data.Config;
 
 namespace MuayThaiApi.Data.Models
 {
@@ -17,41 +17,46 @@ namespace MuayThaiApi.Data.Models
         {
         }
 
-        public virtual DbSet<Afiliado> Afiliados { get; set; }
+        public virtual DbSet<AssignRoleMenu> AssignRoleMenus { get; set; }
         public virtual DbSet<ClasesTomada> ClasesTomadas { get; set; }
+        public virtual DbSet<MenuItem> MenuItems { get; set; }
         public virtual DbSet<MetodosPago> MetodosPagos { get; set; }
         public virtual DbSet<Pago> Pagos { get; set; }
         public virtual DbSet<PasswordsHistory> PasswordsHistories { get; set; }
+        public virtual DbSet<Persona> Personas { get; set; }
+        public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<User> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                IConfigurationRoot configuration = new ConfigurationBuilder()
-                                       .SetBasePath(Directory.GetCurrentDirectory())
-                                       .AddJsonFile("appsettings.json")
-                                       .Build();
-                var connectionString = configuration.GetConnectionString("MuayThaiConn");
-                optionsBuilder.UseSqlServer(connectionString);
+                optionsBuilder.UseSqlServer(AppSettings.Instance.GetConectionStringFromMainProyect("MuayThaiConn"));
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Afiliado>(entity =>
+            modelBuilder.Entity<AssignRoleMenu>(entity =>
             {
-                entity.Property(e => e.FechaNacimiento).HasColumnType("date");
+                entity.HasNoKey();
 
-                entity.Property(e => e.NombreAfiliado)
-                    .HasMaxLength(150)
-                    .IsUnicode(false);
+                entity.ToTable("AssignRoleMenu", "App");
 
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.Afiliados)
-                    .HasForeignKey(d => d.UserId)
+                entity.HasIndex(e => new { e.RolId, e.MenuItemId }, "UK_App_AssignRoleMenu_RolMenu")
+                    .IsUnique();
+
+                entity.HasOne(d => d.MenuItem)
+                    .WithMany()
+                    .HasForeignKey(d => d.MenuItemId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_dbo_Afiliados_UserId");
+                    .HasConstraintName("FK_App_AssignRoleMenu_MenuItemId");
+
+                entity.HasOne(d => d.Rol)
+                    .WithMany()
+                    .HasForeignKey(d => d.RolId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_App_AssignRoleMenu_RolId");
             });
 
             modelBuilder.Entity<ClasesTomada>(entity =>
@@ -66,6 +71,31 @@ namespace MuayThaiApi.Data.Models
                     .HasForeignKey(d => d.PagoId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_dbo_ClasesTomadas_PagoId");
+            });
+
+            modelBuilder.Entity<MenuItem>(entity =>
+            {
+                entity.ToTable("MenuItems", "App");
+
+                entity.HasIndex(e => e.Title, "UQ__MenuItem__2CB664DCFA3B8919")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.TargetPage, "UQ__MenuItem__3B967D445E3A4C58")
+                    .IsUnique();
+
+                entity.Property(e => e.IconSource)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.TargetPage)
+                    .IsRequired()
+                    .HasMaxLength(150)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<MetodosPago>(entity =>
@@ -87,17 +117,17 @@ namespace MuayThaiApi.Data.Models
 
                 entity.Property(e => e.FechaPago).HasColumnType("datetime");
 
-                entity.HasOne(d => d.Afiliado)
-                    .WithMany(p => p.Pagos)
-                    .HasForeignKey(d => d.AfiliadoId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_dbo_Pagos_AfiliadoId");
-
                 entity.HasOne(d => d.Metodo)
                     .WithMany(p => p.Pagos)
                     .HasForeignKey(d => d.MetodoId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_dbo_Pagos_MetodoId");
+
+                entity.HasOne(d => d.Persona)
+                    .WithMany(p => p.Pagos)
+                    .HasForeignKey(d => d.PersonaId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_dbo_Pagos_AfiliadoId");
             });
 
             modelBuilder.Entity<PasswordsHistory>(entity =>
@@ -118,11 +148,42 @@ namespace MuayThaiApi.Data.Models
                     .HasConstraintName("FK_Sec_PasswordsHistory_UserId");
             });
 
+            modelBuilder.Entity<Persona>(entity =>
+            {
+                entity.Property(e => e.FechaNacimiento).HasColumnType("date");
+
+                entity.Property(e => e.NombreAfiliado)
+                    .HasMaxLength(150)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Personas)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_dbo_Afiliados_UserId");
+            });
+
+            modelBuilder.Entity<Role>(entity =>
+            {
+                entity.HasKey(e => e.RolId)
+                    .HasName("PK_App_Roles_Id");
+
+                entity.ToTable("Roles", "App");
+
+                entity.HasIndex(e => e.RolDescription, "UQ__Roles__E0258FCB3E05141C")
+                    .IsUnique();
+
+                entity.Property(e => e.RolDescription)
+                    .IsRequired()
+                    .HasMaxLength(60)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("Users", "Sec");
 
-                entity.HasIndex(e => e.UserName, "UQ__Users__C9F28456D5E79EFC")
+                entity.HasIndex(e => e.UserName, "UQ__Users__C9F284563271D837")
                     .IsUnique();
 
                 entity.Property(e => e.CreatedDate)
@@ -133,10 +194,20 @@ namespace MuayThaiApi.Data.Models
                     .IsRequired()
                     .IsUnicode(false);
 
+                entity.Property(e => e.PasswordSalt)
+                    .IsRequired()
+                    .IsUnicode(false);
+
                 entity.Property(e => e.UserName)
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.HasOne(d => d.Rol)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.RolId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Sec_Users_RolId");
             });
 
             OnModelCreatingPartial(modelBuilder);

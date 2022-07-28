@@ -1,14 +1,19 @@
 ﻿using MuayThaiApi.Data;
-using MuayThaiApi.Data.Models;
+using MuayThaiApi.Entity.Application;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace MuayThaiApi.Core
 {
-    public class Security
+    public class CoApplication
     {
         #region Patron de Diseño
-        private static Security _instance;
+        private static CoApplication _instance;
         private static readonly object _instanceLock = new object();
-        public static Security Instance
+        public static CoApplication Instance
         {
             get
             {
@@ -17,7 +22,7 @@ namespace MuayThaiApi.Core
                     lock (_instanceLock)
                     {
                         if (_instance == null)
-                            _instance = new Security();
+                            _instance = new CoApplication();
                     }
                 }
                 return _instance;
@@ -25,10 +30,10 @@ namespace MuayThaiApi.Core
         }
         #endregion
         #region Metodos publicos
-        public List<MetodosPago> Prueba()
+        public List<MenuItemModel> GetMenu(int id)
         {
-            
-            return BOSecurity.Instance.Users();
+
+            return DaApplication.Instance.GetMenu(id);
         }
         #endregion
         #region Metodos privados
