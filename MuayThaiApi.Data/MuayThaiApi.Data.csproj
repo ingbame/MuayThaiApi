@@ -22,4 +22,8 @@
     <ProjectReference Include="..\MuayThaiApi.Util\MuayThaiApi.Util.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+
 </Project>

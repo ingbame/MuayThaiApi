@@ -12,7 +12,7 @@ namespace MuayThaiApi.Data.Models
 
         public int PersonaId { get; set; }
         public int UserId { get; set; }
-        public string NombreAfiliado { get; set; }
+        public string NombreCompleto { get; set; }
         public DateTime FechaNacimiento { get; set; }
 
         public virtual User User { get; set; }

@@ -30,12 +30,16 @@ namespace MuayThaiApi.Data
         }
         #endregion
         #region Metodos publicos
-        public List<MenuItemModel> GetMenu(int id)
+        public List<MenuItemEn> GetMenu(int id)
         {
             using (var ctx = new IngbameDbContext())
-            {
+            { 
                 var itemsMenu = ctx.AssignRoleMenus.Where(w => w.RolId == id).Select(s => s.MenuItemId).ToList();
-                var result = ctx.MenuItems.Where(w => itemsMenu.Contains(w.MenuItemId)).Select(s => s.CopyProperties(new MenuItemModel())).ToList();
+                if (!itemsMenu.Any())
+                    throw new Exception("No existe el rol asignado.");
+                var result = ctx.MenuItems.Where(w => itemsMenu.Contains(w.MenuItemId)).Select(s => s.CopyProperties(new MenuItemEn())).ToList();
+                if (!result.Any())
+                    throw new Exception("No existe el menu para el rol que tiene este usuario.");
                 return result;
             }
         }

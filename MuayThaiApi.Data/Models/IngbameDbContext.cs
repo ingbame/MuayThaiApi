@@ -152,7 +152,7 @@ namespace MuayThaiApi.Data.Models
             {
                 entity.Property(e => e.FechaNacimiento).HasColumnType("date");
 
-                entity.Property(e => e.NombreAfiliado)
+                entity.Property(e => e.NombreCompleto)
                     .HasMaxLength(150)
                     .IsUnicode(false);
 

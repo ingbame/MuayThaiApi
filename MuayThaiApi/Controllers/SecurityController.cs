@@ -1,42 +1,56 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MuayThaiApi.Core;
 using MuayThaiApi.Entity.Security;
 
 namespace MuayThaiApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class SecurityController : Controller
     {
-        [HttpGet]
-        public ActionResult Index()
+        private IConfiguration _configuration;
+        public SecurityController(IConfiguration configuration)
         {
-            var prueba = CoSecurity.Instance.Prueba();
-            return Ok(prueba);
+            _configuration = configuration;
+        }
+
+        [HttpPost, AllowAnonymous]
+        public ActionResult LoginAuthentication(LoginEn user)
+        {
+            if (string.IsNullOrEmpty(user.UserName))
+                return BadRequest("Nombre de usuario vacío");
+            if (string.IsNullOrEmpty(user.Password))
+                return BadRequest("Contraseña vacía");
+
+            var jwtConf = new JwtConfEn
+            {
+                Key = _configuration["Jwt:Key"],
+                Issuer = _configuration["Jwt:Issuer"],
+                Audience = _configuration["Jwt:Audience"]
+            };
+
+            var response = CoSecurity.Instance.LoginAuthentication(user, jwtConf);
+
+            if (response.Error)
+                return BadRequest(response.Message);
+
+            return Ok(response.Model);
         }
         [HttpPost]
-        public ActionResult AltaAfiliado(_Afiliado persona)
+        public ActionResult CreateNewPerson(CredentialsEn credential)
         {
-            if (persona == null)
+            if (credential == null)
                 return NoContent();
-            if (string.IsNullOrEmpty(persona.NombreAfiliado.Trim()))
+            if (string.IsNullOrEmpty(credential.Persona.NombreCompleto.Trim()))
                 return BadRequest("Nombre de afiliado vacío.");
-            if (persona.FechaNacimiento == null)
+            if (credential.Persona.FechaNacimiento == null)
                 return BadRequest("Revise su fecha de nacimiento.");
-            if (persona.FechaNacimiento < DateTime.Parse("1940-01-01"))
+            if (credential.Persona.FechaNacimiento < DateTime.Parse("1940-01-01"))
                 return BadRequest("Excede los 80 años, revise su fecha de nacimiento.");
-            var personaResult = CoSecurity.Instance.AltaAfiliado(persona);
-            return CreatedAtAction("GetAfiliado", new { id = personaResult.AfiliadoId });
-        }
-        [HttpGet("{id}")]
-        public ActionResult<_AfiliadoDto> GetAfiliado(int? id)
-        {
-            if (id == null)
-                return BadRequest("No se pudo buscar afiliado por id");            
-            var afiliado = CoSecurity.Instance.GetAfiliado(id);
-            if (afiliado == null)
-                return NotFound();
-            return afiliado;
+            //Validar los demás datos
+            var personaResult = CoSecurity.Instance.CreateNewPerson(credential);
+            return Ok(personaResult);
         }
     }
 }

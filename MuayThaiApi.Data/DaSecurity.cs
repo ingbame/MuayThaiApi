@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MuayThaiApi.Data.Models;
+using MuayThaiApi.Entity.Business;
 using MuayThaiApi.Entity.Security;
 using System;
 using System.Collections.Generic;
@@ -31,68 +32,51 @@ namespace MuayThaiApi.Data
         }
         #endregion
         #region Metodos publicos
-        public List<_UserDto> Users()
+        public CredentialsEn GetUser(string user)
         {
             using (var ctx = new IngbameDbContext())
             {
-                return ctx.Users.Select(s => s.CopyProperties(new _UserDto())).ToList();
+                var response = new CredentialsEn
+                {
+                    User = ctx.Users.Where(w => w.UserName.ToLower().Equals(user.ToLower())).Select(s => s.CopyProperties(new UserEn())).FirstOrDefault()
+                };
+                return response;
             }
         }
-        public _Afiliado AltaAfiliado(_Afiliado persona)
+        public CredentialsDtoEn CreateNewPerson(CredentialsEn newUser, string salt, string password)
         {
-            try
-            {                
-                using (var ctx = new IngbameDbContext())
-                {
-                    Persona afiliadoNuevo = persona.CopyProperties(new Persona());
-                    User userNuevo = persona.Credenciales.CopyProperties(new User());
+            using (var ctx = new IngbameDbContext())
+            {
+                var personaToAdd = newUser.Persona.CopyProperties(new Persona());
+                var userToAdd = newUser.User.CopyProperties(new User());
+                userToAdd.Password = password;
+                userToAdd.PasswordSalt = salt;
 
-                    var trans = ctx.Database.BeginTransaction();
-                    var userResult = ctx.Users.Where(w => w.UserName == userNuevo.UserName).FirstOrDefault();
-                    if(userResult != null)
-                        throw new Exception("Nombre de usuario registrado ya existe.");
-                    var addUser = ctx.Users.Add(userNuevo);
-                    if (addUser.State != EntityState.Added)
-                        throw new Exception("No se agregó el usuario correctamente");
-                    ctx.SaveChanges();
-                    //persona.Credenciales = addUser.Entity.CopyProperties(new _User());
-                    afiliadoNuevo.UserId = userNuevo.UserId;
-                    var addAfiliado = ctx.Personas.Add(afiliadoNuevo);
-                    if (addAfiliado.State != EntityState.Added)
-                        throw new Exception("No se agregó el afiliado correctamente");
-                    ctx.SaveChanges();
-                    trans.Commit();
-                    persona = afiliadoNuevo.CopyProperties(new _Afiliado());
-                    persona.Credenciales = userNuevo.CopyProperties(new _User());
-                    return persona;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-        public _AfiliadoDto GetAfiliado(int? id)
-        {
-            try
-            {
-                using (var ctx = new IngbameDbContext())
-                {
-                    var afiliadoResult = ctx.Personas.Find(id);
-                    if (afiliadoResult == null)
-                        throw new Exception("No se encontró afiliado.");
-                    var userResult = ctx.Users.Find(afiliadoResult.UserId);
-                    if (userResult == null)
-                        throw new Exception("No se encontró usuario relacionado al afiliado");
-                    var afiliadoReturn = afiliadoResult.CopyProperties(new _AfiliadoDto());
-                    afiliadoReturn.Credenciales = userResult.CopyProperties(new _UserDto());
+                var trans = ctx.Database.BeginTransaction();
+                var userResult = ctx.Users.Where(w => w.UserName == userToAdd.UserName).FirstOrDefault();
+                if (userResult != null)
+                    throw new Exception("Nombre de usuario registrado ya existe.");
+                var addUser = ctx.Users.Add(userToAdd);
+                if (addUser.State != EntityState.Added)
+                    throw new Exception("No se agregó el usuario correctamente");
+                ctx.SaveChanges();
 
-                    return afiliadoReturn;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
+                //Validar que la persona exista, pendiente
+                personaToAdd.UserId = userToAdd.UserId;
+                var addPersona = ctx.Personas.Add(personaToAdd);
+                if (addPersona.State != EntityState.Added)
+                    throw new Exception("No se agregó el afiliado correctamente");
+                ctx.SaveChanges();
+
+                trans.Commit();
+
+                var response = new CredentialsDtoEn
+                {
+                    Persona = personaToAdd.CopyProperties(new PersonaEn()),
+                    User = userToAdd.CopyProperties(new LoginDtoEn())
+                };
+
+                return response;
             }
         }
         #endregion

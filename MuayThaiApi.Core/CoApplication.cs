@@ -1,5 +1,6 @@
 ﻿using MuayThaiApi.Data;
 using MuayThaiApi.Entity.Application;
+using MuayThaiApi.Entity.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,10 +31,22 @@ namespace MuayThaiApi.Core
         }
         #endregion
         #region Metodos publicos
-        public List<MenuItemModel> GetMenu(int id)
+        public ResponseObject<List<MenuItemEn>> GetMenu(int id)
         {
-
-            return DaApplication.Instance.GetMenu(id);
+            var response = new ResponseObject<List<MenuItemEn>>();
+            try
+            {
+                response.Model = DaApplication.Instance.GetMenu(id);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Error = true;
+                response.Message = ex.Message;
+                if (ex.InnerException != null)
+                    response.Message += $"\n{ex.InnerException.Message}";
+                return response;
+            }
         }
         #endregion
         #region Metodos privados

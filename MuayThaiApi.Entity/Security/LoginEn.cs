@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace MuayThaiApi.Entity.Security
 {
-    public class _UserDto
+    public class LoginEn
     {
-        public int UserId { get; set; }
         public string UserName { get; set; }
-        public DateTime CreatedDate { get; set; }
+        public string Password { get; set; }
     }
 }
