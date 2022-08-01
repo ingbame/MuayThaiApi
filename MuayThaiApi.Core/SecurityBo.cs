@@ -9,12 +9,12 @@ using System.Text;
 
 namespace MuayThaiApi.Core
 {
-    public class CoSecurity
+    public class SecurityBo
     {
         #region Patron de Diseño
-        private static CoSecurity _instance;
+        private static SecurityBo _instance;
         private static readonly object _instanceLock = new object();
-        public static CoSecurity Instance
+        public static SecurityBo Instance
         {
             get
             {
@@ -23,7 +23,7 @@ namespace MuayThaiApi.Core
                     lock (_instanceLock)
                     {
                         if (_instance == null)
-                            _instance = new CoSecurity();
+                            _instance = new SecurityBo();
                     }
                 }
                 return _instance;
@@ -109,9 +109,11 @@ namespace MuayThaiApi.Core
         private byte[] GetHash(string PlainPassword, string Salt)
         {
             byte[] byteArray = Encoding.Unicode.GetBytes(string.Concat(Salt, PlainPassword));
-            var sha256 = new HMACSHA256();
-            byte[] hashedBytes = sha256.ComputeHash(byteArray);
-            return hashedBytes;
+            using (SHA256 mySHA256 = SHA256.Create())
+            {
+                byte[] hashedBytes = mySHA256.ComputeHash(byteArray);
+                return hashedBytes;
+            }
         }
         private bool CompareHashedPasswords(string InputPassword, string ExistingHashedBase64StringPassword, string Salt)
         {
@@ -126,15 +128,16 @@ namespace MuayThaiApi.Core
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, credential.User.UserName),
-                new Claim(ClaimTypes.Name, "Prueba Nombre"),
-                new Claim(ClaimTypes.Role,"SuperAdmin")
+                new Claim(ClaimTypes.Name, credential.Persona.FullName),
+                new Claim(ClaimTypes.GivenName, credential.Persona.NickName),
+                new Claim(ClaimTypes.Role,credential.User.Role.RoleDescription)
             };
-
+            var expires = DateTime.Now.AddMinutes(1);
             var token = new JwtSecurityToken(
                 jwtConf.Issuer,
                 jwtConf.Audience,
                 claims,
-                expires: DateTime.Now.AddMinutes(2),
+                expires: expires,
                 signingCredentials: credentials);
             return new JwtSecurityTokenHandler().WriteToken(token);
         }

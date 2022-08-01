@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace MuayThaiApi.Entity.Security
 {
-    public class LoginDtoEn
+    public class RoleEn
     {
+        public int RoleId { get; set; }
         public string RoleDescription { get; set; }
-        public string UserName { get; set; }
     }
 }

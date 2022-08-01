@@ -36,11 +36,13 @@ namespace MuayThaiApi.ApiCommon
                 {
                     Persona = new PersonaEn
                     {
-                        NombreCompleto = credentialClaims.FirstOrDefault(o => o.Type == ClaimTypes.Name)?.Value
+                        FullName = credentialClaims.FirstOrDefault(o => o.Type == ClaimTypes.Name)?.Value,
+                        NickName = credentialClaims.FirstOrDefault(o => o.Type == ClaimTypes.GivenName)?.Value,
                     },
                     User = new LoginDtoEn
                     {
-                        UserName = credentialClaims.FirstOrDefault(o => o.Type == ClaimTypes.NameIdentifier)?.Value
+                        UserName = credentialClaims.FirstOrDefault(o => o.Type == ClaimTypes.NameIdentifier)?.Value,
+                        RoleDescription = credentialClaims.FirstOrDefault(o => o.Type == ClaimTypes.Role)?.Value
                     }
                 };
             }

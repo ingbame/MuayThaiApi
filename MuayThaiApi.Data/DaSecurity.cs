@@ -36,10 +36,17 @@ namespace MuayThaiApi.Data
         {
             using (var ctx = new IngbameDbContext())
             {
-                var response = new CredentialsEn
+                var response = default(CredentialsEn);
+                var userResult = ctx.Users.Where(w => w.UserName.ToLower().Equals(user.ToLower())).FirstOrDefault();
+                if (userResult != null)
                 {
-                    User = ctx.Users.Where(w => w.UserName.ToLower().Equals(user.ToLower())).Select(s => s.CopyProperties(new UserEn())).FirstOrDefault()
-                };
+                    response = new CredentialsEn();
+                    response.User = userResult.CopyProperties(new UserEn());
+                    var getRole = ctx.Roles.Find(userResult.RoleId);
+                    response.User.Role = getRole.CopyProperties(new RoleEn());
+                    var getPerson = ctx.People.Where(w => w.UserId == userResult.UserId).FirstOrDefault();
+                    response.Persona = getPerson.CopyProperties(new PersonaEn());
+                }
                 return response;
             }
         }
@@ -48,9 +55,14 @@ namespace MuayThaiApi.Data
             using (var ctx = new IngbameDbContext())
             {
                 var personaToAdd = newUser.Persona.CopyProperties(new Person());
-                var userToAdd = newUser.User.CopyProperties(new User());
-                userToAdd.Password = password;
-                userToAdd.PasswordSalt = salt;
+                var getDefaultRole = ctx.Roles.Where(w => w.RoleDescription.Equals("Usuario")).FirstOrDefault();
+                var userToAdd = new User
+                {
+                    UserName = newUser.User.UserName,
+                    Password = password,
+                    PasswordSalt = salt,
+                    RoleId = getDefaultRole.RoleId
+                };
 
                 var trans = ctx.Database.BeginTransaction();
                 var userResult = ctx.Users.Where(w => w.UserName == userToAdd.UserName).FirstOrDefault();

@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace MuayThaiApi.Core
 {
-    public class CoApplication
+    public class ApplicationBo
     {
         #region Patron de Diseño
-        private static CoApplication _instance;
+        private static ApplicationBo _instance;
         private static readonly object _instanceLock = new object();
-        public static CoApplication Instance
+        public static ApplicationBo Instance
         {
             get
             {
@@ -23,7 +23,7 @@ namespace MuayThaiApi.Core
                     lock (_instanceLock)
                     {
                         if (_instance == null)
-                            _instance = new CoApplication();
+                            _instance = new ApplicationBo();
                     }
                 }
                 return _instance;
@@ -31,12 +31,12 @@ namespace MuayThaiApi.Core
         }
         #endregion
         #region Metodos publicos
-        public ResponseObject<List<MenuItemEn>> GetMenu(int id)
+        public ResponseObject<List<MenuItemEn>> GetMenu(string Role)
         {
             var response = new ResponseObject<List<MenuItemEn>>();
             try
             {
-                response.Model = DaApplication.Instance.GetMenu(id);
+                response.Model = DaApplication.Instance.GetMenu(Role);
                 return response;
             }
             catch (Exception ex)

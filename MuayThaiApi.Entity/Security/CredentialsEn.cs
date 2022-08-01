@@ -9,6 +9,11 @@ namespace MuayThaiApi.Entity.Security
 {
     public class CredentialsEn
     {
+        public CredentialsEn()
+        {
+            Persona = new PersonaEn();
+            User = new UserEn();
+        }
         public PersonaEn Persona { get; set; }
         public UserEn User { get; set; }
     }

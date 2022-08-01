@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MuayThaiApi.Core
 {
-    public class CoCommon
+    public class CommonBo
     {
     }
 }
