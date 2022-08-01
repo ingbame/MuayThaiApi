@@ -47,7 +47,7 @@ namespace MuayThaiApi.Data
         {
             using (var ctx = new IngbameDbContext())
             {
-                var personaToAdd = newUser.Persona.CopyProperties(new Persona());
+                var personaToAdd = newUser.Persona.CopyProperties(new Person());
                 var userToAdd = newUser.User.CopyProperties(new User());
                 userToAdd.Password = password;
                 userToAdd.PasswordSalt = salt;
@@ -63,7 +63,7 @@ namespace MuayThaiApi.Data
 
                 //Validar que la persona exista, pendiente
                 personaToAdd.UserId = userToAdd.UserId;
-                var addPersona = ctx.Personas.Add(personaToAdd);
+                var addPersona = ctx.People.Add(personaToAdd);
                 if (addPersona.State != EntityState.Added)
                     throw new Exception("No se agregó el afiliado correctamente");
                 ctx.SaveChanges();

@@ -8,18 +8,21 @@ namespace MuayThaiApi.Data.Models
         public User()
         {
             PasswordsHistories = new HashSet<PasswordsHistory>();
-            Personas = new HashSet<Persona>();
+            People = new HashSet<Person>();
         }
 
-        public int UserId { get; set; }
+        public long UserId { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
         public string PasswordSalt { get; set; }
-        public int RolId { get; set; }
+        public int RoleId { get; set; }
         public DateTime CreatedDate { get; set; }
+        public bool CanEdit { get; set; }
+        public bool SavePasswords { get; set; }
+        public bool? IsActive { get; set; }
 
-        public virtual Role Rol { get; set; }
+        public virtual Role Role { get; set; }
         public virtual ICollection<PasswordsHistory> PasswordsHistories { get; set; }
-        public virtual ICollection<Persona> Personas { get; set; }
+        public virtual ICollection<Person> People { get; set; }
     }
 }

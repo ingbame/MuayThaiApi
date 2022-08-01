@@ -10,8 +10,8 @@ namespace MuayThaiApi.Data.Models
             Users = new HashSet<User>();
         }
 
-        public int RolId { get; set; }
-        public string RolDescription { get; set; }
+        public int RoleId { get; set; }
+        public string RoleDescription { get; set; }
 
         public virtual ICollection<User> Users { get; set; }
     }
